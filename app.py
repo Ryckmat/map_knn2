@@ -15,61 +15,121 @@ from sklearn.cluster import KMeans
 import seaborn as sn
 import dash_table
 
-########### Define your variables
-beers=['Chesapeake Stout', 'Snake Dog IPA', 'Imperial Porter', 'Double Dog IPA']
-ibu_values=[35, 60, 85, 75]
-abv_values=[5.4, 7.1, 9.2, 4.3]
-color1='lightblue'
-color2='darkgreen'
-mytitle='Beer Comparison'
-tabtitle='beer!'
-myheading='Flying Dog Beers'
-label1='IBU'
-label2='ABV'
-githublink='https://github.com/austinlasseter/flying-dog-beers'
-sourceurl='https://www.flyingdog.com/beers/'
+##########################################################################
+##########################################################################
 
-########### Set up the chart
-bitterness = go.Bar(
-    x=beers,
-    y=ibu_values,
-    name=label1,
-    marker={'color':color1}
-)
-alcohol = go.Bar(
-    x=beers,
-    y=abv_values,
-    name=label2,
-    marker={'color':color2}
-)
+path_to_json = 'departements-france'
+json_files = [pos_json for pos_json in os.listdir(path_to_json) if pos_json.endswith('.json')]
 
-beer_data = [bitterness, alcohol]
-beer_layout = go.Layout(
-    barmode='group',
-    title = mytitle
-)
+x = datetime.datetime(2020, 3, 1)
+df = pd.DataFrame()
+for i in sorted(json_files):
+    df_temp = gpd.read_file('departements-france/'+i)
+    df_temp["date"] = x
+    x+= timedelta(days=1)
+    frames = [df_temp, df]
+    df = pd.concat(frames)
 
-beer_fig = go.Figure(data=beer_data, layout=beer_layout)
+##########################################################################
+##########################################################################
+df1 = pd.DataFrame(df)
+df1["lon"] = df.geometry.x
+df1["lat"] = df.geometry.y
 
+DeserializableColumns = ['Population', 'Beds']
+
+for DeserializableColumn in DeserializableColumns:
+
+  #Normalize Json Format
+  jsonDf = pd.json_normalize(df1[DeserializableColumn])
+
+  #Adding normalised json data into Df
+  df1 = df1.join(jsonDf, rsuffix='' + DeserializableColumn)
+
+#Drop Json Data
+df1 = df1.drop(DeserializableColumns, axis=1)
+
+df1= df1.drop(['geometry', 'Emergencies', 'MedicalTests','MedicalActs'], axis=1)
+df1["Confirmed"].fillna(0.0, inplace = True)
+df1["Deaths"].fillna(0.0, inplace = True)
+df1["Recovered"].fillna(0.0, inplace = True)
+df1["Severe"].fillna(0.0, inplace = True)
+df1["Critical"].fillna(0.0, inplace = True)
+##########################################################################
+##########################################################################
+
+
+X2 = pd.DataFrame()
+X2["lon"]=df1["lon"]
+X2["lat"]=df1["lat"]
+X2["Deaths"]=df1["Deaths"]
+# X2["Recovered"]=df1["Recovered"]
+# X2["Severe"]=df1["Severe"]
+# X2["Critical"]=df1["Critical"]
+# X2["Confirmed"]=df1["Confirmed"]
+# X2["Total"]=df1["Total"]
+# X2["Under19"]=df1["Under19"]
+# X2["Under39"]=df1["Under39"]
+# X2["Under59"]=df1["Under59"]
+# X2["Under74"]=df1["Under74"]
+# X2["Over75"]=df1["Over75"]
+# X2["Resuscitation"]=df1["Resuscitation"]
+# X2["IntensiveCare"]=df1["IntensiveCare"]
+# X2["TotalBeds"]=df1["TotalBeds"]
+X2["date"]=df1["date"]
+X2["Province/State"]=df1["Province/State"]
+X2["date"]= X2["date"].apply(lambda x: x.strftime('%Y-%m-%d'))
+X3 = X2.sort_values(by='date')
+
+##########################################################################
+##########################################################################
+kmeans = KMeans(n_clusters = 3, init ='k-means++')
+kmeans.fit(X3[X2.columns[0:3]]) # Compute k-means clustering.
+X3['cluster_label'] = kmeans.fit_predict(X3[X2.columns[0:3]])
+centers = kmeans.cluster_centers_ # Coordinates of cluster centers.
+labels = kmeans.predict(X3[X2.columns[0:3]]) # Labels of each point
+
+
+
+##########################################################################
+##########################################################################
+fig = go.Figure()
+fig = px.scatter_mapbox(X3, lat="lat", lon="lon",
+                        color="cluster_label", zoom=3, size="Deaths",animation_frame="date",  height=500,hover_name="Province/State")
+fig.update_layout(mapbox_style="stamen-terrain")
+fig.update_layout(margin={"r":0,"t":0,"l":0,"b":0})
 
 ########### Initiate the app
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 server = app.server
-app.title=tabtitle
 
-########### Set up the layout
-app.layout = html.Div(children=[
-    html.H1(myheading),
-    dcc.Graph(
-        id='flyingdog',
-        figure=beer_fig
-    ),
-    html.A('Code on Github', href=githublink),
-    html.Br(),
-    html.A('Data Source', href=sourceurl),
-    ]
-)
+app.layout = html.Div([
+    html.H1(children='Dashboard COVID-19',style={
+            'textAlign': 'center'}),
+    html.H4(children='Lien vers le chat bot'),
+    html.A(html.Button('Chat bot COVID-19', className='three columns'),
+    href='https://chat-bot-covid19.herokuapp.com/#/'),
+    html.H4(children='Chat Bot'),
+    html.Iframe(src="https://chat-bot-covid19.herokuapp.com/#/", height=500, width="100%"),
+    html.H4(children='Carte des clusters en fonction du nombre de mort'),
+    dcc.Graph(figure=fig),
+    html.H4(children='Tableau des données des analyses'),
+    dash_table.DataTable(
+    id='datatable-interactivity',
+    columns=[
+        {"name": i, "id": i, "selectable": True} for i in X3.columns
+    ],
+    data=X3.to_dict('rows'),
+    sort_action="native",
+    sort_mode="multi",
+    page_action="native",
+    filter_action='native',
+    page_current= 0,
+    page_size= 10,
+    export_format='xlsx')
+])
+
 
 if __name__ == '__main__':
     app.run_server()
