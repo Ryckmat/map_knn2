@@ -128,7 +128,7 @@ app.layout = html.Div([
     page_current= 0,
     page_size= 10,
     export_format='xlsx')
-])
+], style={'display' : 'flex', 'flex-direction' : 'column', 'aline-items':'center'})
 
 
 if __name__ == '__main__':
