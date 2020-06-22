@@ -1,15 +1,20 @@
 # Import required libraries
-import os
 from random import randint
-
-import plotly as py
-from plotly.graph_objs import *
-
 import flask
 import dash
-from dash.dependencies import Input, Output, State, Event
 import dash_core_components as dcc
 import dash_html_components as html
+import os, json
+import geopandas as gpd
+import matplotlib.pyplot as plt
+import pandas as pd
+import plotly.express as px
+import datetime
+from datetime import timedelta
+from sklearn.cluster import KMeans
+import seaborn as sn
+import plotly.graph_objects as go
+import dash_table
 
 
 # Setup the app
