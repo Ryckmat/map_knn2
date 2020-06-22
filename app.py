@@ -99,7 +99,7 @@ fig = go.Figure()
 fig = px.scatter_mapbox(X3, lat="lat", lon="lon",
                         color="cluster_label", zoom=5, size="Deaths",
                         animation_frame="date",  height=750,
-                        hover_name="Province/State", center={"lat": 46.4317, "lon": 2.3037})
+                        hover_name="Province/State")
 fig.update_layout(mapbox_style="stamen-terrain")
 fig.update_layout(margin={"r":0,"t":0,"l":0,"b":0})
 
