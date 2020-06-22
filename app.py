@@ -3,6 +3,18 @@ import dash_core_components as dcc
 import dash_html_components as html
 import plotly.graph_objs as go
 
+import dash
+import os, json
+import geopandas as gpd
+import matplotlib.pyplot as plt
+import pandas as pd
+import plotly.express as px
+import datetime
+from datetime import timedelta
+from sklearn.cluster import KMeans
+import seaborn as sn
+import dash_table
+
 ########### Define your variables
 beers=['Chesapeake Stout', 'Snake Dog IPA', 'Imperial Porter', 'Double Dog IPA']
 ibu_values=[35, 60, 85, 75]
