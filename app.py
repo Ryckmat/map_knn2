@@ -2,7 +2,7 @@
 import os
 from random import randint
 
-import plotly.plotly as py
+import plotly as py
 from plotly.graph_objs import *
 
 import flask
