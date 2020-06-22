@@ -15,6 +15,8 @@ from sklearn.cluster import KMeans
 import seaborn as sn
 import dash_table
 
+from dash.dependencies import Input, Output
+
 ##########################################################################
 ##########################################################################
 
@@ -95,7 +97,9 @@ labels = kmeans.predict(X3[X2.columns[0:3]]) # Labels of each point
 ##########################################################################
 fig = go.Figure()
 fig = px.scatter_mapbox(X3, lat="lat", lon="lon",
-                        color="cluster_label", zoom=3, size="Deaths",animation_frame="date",  height=500,hover_name="Province/State")
+                        color="cluster_label", zoom=5, size="Deaths",
+                        animation_frame="date",  height=750,
+                        hover_name="Province/State", center={"lat": 46.4317, "lon": 2.3037})
 fig.update_layout(mapbox_style="stamen-terrain")
 fig.update_layout(margin={"r":0,"t":0,"l":0,"b":0})
 
@@ -104,31 +108,60 @@ external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 server = app.server
 
+# app.layout = html.Div([
+#
+# ], style={'display' : 'flex', 'flex-direction' : 'column', 'align-items':'center'})
+
+
 app.layout = html.Div([
-    html.H1(children='Dashboard COVID-19',style={
-            'textAlign': 'center'}),
-    html.H4(children='Lien vers le chat bot'),
-    html.A(html.Button('Chat bot COVID-19', className='three columns'),
-    href='https://chat-bot-covid19.herokuapp.com/#/'),
-    html.H4(children='Chat Bot'),
-    html.Iframe(src="https://chat-bot-covid19.herokuapp.com/#/", height=500, width="100%"),
-    html.H4(children='Carte des clusters en fonction du nombre de mort'),
-    dcc.Graph(figure=fig),
-    html.H4(children='Tableau des données des analyses'),
-    dash_table.DataTable(
-    id='datatable-interactivity',
-    columns=[
-        {"name": i, "id": i, "selectable": True} for i in X3.columns
-    ],
-    data=X3.to_dict('rows'),
-    sort_action="native",
-    sort_mode="multi",
-    page_action="native",
-    filter_action='native',
-    page_current= 0,
-    page_size= 10,
-    export_format='xlsx')
-], style={'display' : 'flex', 'flex-direction' : 'column', 'aline-items':'center'})
+    html.Div([html.Img(src="assets/crayon2.jpg", width=300)],  style={'textAlign': 'center'}),
+    dcc.Tabs(id="tabs-styled-with-props", value='tab-2', children=[
+        dcc.Tab(label='Pré-diagnostic', value='tab-1'),
+        dcc.Tab(label='Visualisation', value='tab-2'),
+        dcc.Tab(label='Analyses', value='tab-3'),
+    ], colors={
+        "border": "white",
+        "primary": "gold",
+        "background": "whitesmoke"
+    }),
+    html.Div(id='tabs-content-props')
+])
+
+@app.callback(Output('tabs-content-props', 'children'),
+              [Input('tabs-styled-with-props', 'value')])
+def render_content(tab):
+    if tab == 'tab-1':
+        return html.Div([
+        html.Div([html.Iframe(src="https://chat-bot-covid19.herokuapp.com/#/", height=450, width="100%", style={'border':'none'})])])
+    elif tab == 'tab-2':
+        return html.Div([
+            html.H4(children='Carte des clusters en fonction du nombre de mort'),
+            dcc.Graph(figure=fig),
+            html.H4(children='Tableau des données des analyses'),
+            dash_table.DataTable(
+            id='datatable-interactivity',
+            columns=[
+                {"name": i, "id": i, "selectable": True} for i in X3.columns
+            ],
+            data=X3.to_dict('rows'),
+            sort_action="native",
+            sort_mode="multi",
+            page_action="native",
+            filter_action='native',
+            page_current= 0,
+            page_size= 10,
+            export_format='xlsx')
+        ])
+    elif tab == 'tab-3':
+        return html.Div([
+               html.Div([
+               html.H6(children='Ce collab renvoie à une étude sur la charge virale des patients. En résumé, la charge virale représente le potentiel de contamination et à être contaminé. On y retrouve des graphiques comme des nuages de points. Cette étude pourra permettre de développer l\'outil de pré-diagnostic et offre un nouvel axe d\'évaluation des risques. En résumé, la charge virale représente le potentiel de contamination et de développer des complications graves par rapport à la maladie'),
+               html.A(html.Button('Charge virale', className='three columns'),href='https://colab.research.google.com/drive/1eHbrFwOYndR-l031-TYZ0N54pfUE_rOw?usp=sharing')],style={'width': '100%', 'display': 'inline-block'}),
+               html.Div([html.H4(children=' ')]),
+               html.Div([
+               html.H6(children='Ce collab renvoie à une étude sur le taux de fréquentation des organismes de santé. On y retrouve une courbe d\'évolution qui pourrait servir en tant que référence pour planifier une éventuelle seconde vague et en optimiser la gestion.'),
+               html.A(html.Button('Taux d\'occupation des organismes de santé', className='three columns'),href='https://colab.research.google.com/drive/1wYT9LdJhQAtN74gmvpLI762Vum6QyuYZ?usp=sharing')], style={'width': '100%', 'display': 'inline-block'}),
+               ])
 
 
 if __name__ == '__main__':
