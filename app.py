@@ -161,7 +161,9 @@ def render_content(tab):
                html.Div([
                html.H6(children='Ce collab renvoie à une étude sur le taux de fréquentation des organismes de santé. On y retrouve une courbe d\'évolution qui pourrait servir en tant que référence pour planifier une éventuelle seconde vague et en optimiser la gestion.'),
                html.A(html.Button('Fréquentation hopitaux', className='three columns'),href='https://colab.research.google.com/drive/1wYT9LdJhQAtN74gmvpLI762Vum6QyuYZ?usp=sharing')], style={'white-space': 'pre-line','width': '100%', 'display': 'inline-block'}),
-               ])
+               html.Div([html.Form(action="https://colab.research.google.com/drive/1wYT9LdJhQAtN74gmvpLI762Vum6QyuYZ?usp=sharing", children=[dcc.Input(id="input1", type="submit", value="Taux d\'occupation dans les services de santé")])])
+
+               ]),
 
 
 if __name__ == '__main__':
