@@ -157,10 +157,10 @@ def render_content(tab):
                html.Div([
                html.H6(children='Ce collab renvoie à une étude sur la charge virale des patients. En résumé, la charge virale représente le potentiel de contamination et à être contaminé. On y retrouve des graphiques comme des nuages de points. Cette étude pourra permettre de développer l\'outil de pré-diagnostic et offre un nouvel axe d\'évaluation des risques. En résumé, la charge virale représente le potentiel de contamination et de développer des complications graves par rapport à la maladie'),
                html.A(html.Button('Charge virale', className='three columns'),href='https://colab.research.google.com/drive/1eHbrFwOYndR-l031-TYZ0N54pfUE_rOw?usp=sharing')],style={'width': '100%', 'display': 'inline-block'}),
-               html.Div([html.H4(children=' ')], style={'white-space':'normal','textAlign': 'center'}),
+               html.Div([html.H4(children=' ')], style={'textAlign': 'center'}),
                html.Div([
                html.H6(children='Ce collab renvoie à une étude sur le taux de fréquentation des organismes de santé. On y retrouve une courbe d\'évolution qui pourrait servir en tant que référence pour planifier une éventuelle seconde vague et en optimiser la gestion.'),
-               html.A(html.Button('Taux d\'occupation des organismes de santé', className='three columns'),href='https://colab.research.google.com/drive/1wYT9LdJhQAtN74gmvpLI762Vum6QyuYZ?usp=sharing')], style={'width': '100%', 'display': 'inline-block'}),
+               html.A(html.Button('Taux d\'occupation des organismes de santé', className='three columns'),href='https://colab.research.google.com/drive/1wYT9LdJhQAtN74gmvpLI762Vum6QyuYZ?usp=sharing')], style={'white-space':'normal','width': '100%', 'display': 'inline-block'}),
                ])
 
 
